@@ -11,10 +11,6 @@ import java.util.List;
 @RequestMapping("/api/users")
 public class UserController {
 
-//    @GetMapping
-//    public String sayHello(){
-//        return "Hello World";
-//    }
     @PostMapping
     public UserInfoResponse createUser(@RequestBody UserInfoRequest request) {
         return new UserInfoResponse();
