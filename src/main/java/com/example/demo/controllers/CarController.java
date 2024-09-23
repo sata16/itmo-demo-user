@@ -1,13 +1,18 @@
 package com.example.demo.controllers;
 
+import com.example.demo.model.dto.request.AllCarToUserRequest;
 import com.example.demo.model.dto.request.CarInfoRequest;
+import com.example.demo.model.dto.request.CarToUserRequest;
 import com.example.demo.model.dto.response.CarInfoResponse;
 import com.example.demo.service.CarService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Sort;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.util.List;
 @Tag(name = "Машины")
 @RestController
@@ -42,7 +47,25 @@ public class CarController {
     //получение всех cars
     @GetMapping("/all")
     @Operation(summary = "Получить список машин")
-    public List<CarInfoResponse> getAllCars(){
-        return carService.getAllCars();
+    public Page<CarInfoResponse> getAllCars(@RequestParam (defaultValue = "1")  Integer page,
+                                            @RequestParam(defaultValue = "10") Integer perPage,
+                                            @RequestParam(defaultValue = "brand") String sort,
+                                            @RequestParam(defaultValue = "ASC") Sort.Direction order,
+                                            @RequestParam(required = false) String filter){
+        return carService.getAllCars(page, perPage, sort, order, filter);
     }
+    //добавляем автомобиль пользователю
+    @PostMapping("/CarToUser")
+    @Operation(summary = "Добавить автомобиль пользователю")
+    public void addCarToUser(@RequestBody @Valid CarToUserRequest request) {
+        carService.addCarToUser(request);
+    }
+    //все авто пользователя
+    @GetMapping("/AllCarToUser/{id}")
+    @Operation(summary = "Получить все машины по ID пользователя")
+    public List<CarInfoResponse> getAllCarToUser(@PathVariable Long id) {
+        return carService.getAllCarToUser(id);
+    }
+
+
 }
