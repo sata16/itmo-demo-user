@@ -62,7 +62,7 @@ public class UserService {
 
     //Проверка статуса пользователя
     public void controlStatus(Long id){
-        userRepository.findById(id).filter(user -> user.getStatus().equals(UserStatus.DELETED)).orElseThrow(()->new CustomException("User has status DELETED", HttpStatus.BAD_REQUEST));
+        userRepository.findById(id).filter(user -> !user.getStatus().equals(UserStatus.DELETED)).orElseThrow(()->new CustomException("User has status DELETED", HttpStatus.BAD_REQUEST));
 
 
     }
