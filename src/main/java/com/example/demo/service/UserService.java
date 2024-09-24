@@ -5,6 +5,7 @@ import com.example.demo.model.db.entity.User;
 import com.example.demo.model.db.repository.UserRepository;
 import com.example.demo.model.dto.request.UserInfoRequest;
 import com.example.demo.model.dto.response.UserInfoResponse;
+import com.example.demo.model.enums.Gender;
 import com.example.demo.model.enums.UserStatus;
 import com.example.demo.utils.PaginationUtil;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -21,6 +22,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -32,7 +34,6 @@ public class UserService {
 
     public UserInfoResponse createUser(UserInfoRequest request) {
         validateEmail(request);
-
 
         //проверка дублирования email
         userRepository.findByEmailIgnoreCase(request.getEmail())
@@ -57,6 +58,13 @@ public class UserService {
     //отдельный метод для получения юзера. Исключаем дублирование в коде
     public User getUserFromDB(Long id){
         return userRepository.findById(id).orElseThrow(()->new CustomException("User not found", HttpStatus.NOT_FOUND));
+    }
+
+    //Проверка статуса пользователя
+    public void controlStatus(Long id){
+        userRepository.findById(id).filter(user -> user.getStatus().equals(UserStatus.DELETED)).orElseThrow(()->new CustomException("User has status DELETED", HttpStatus.BAD_REQUEST));
+
+
     }
     //проверка валидации email
     private void validateEmail(UserInfoRequest request) {

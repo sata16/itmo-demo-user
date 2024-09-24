@@ -110,16 +110,17 @@ public class CarService {
     }
 
     public List<CarInfoResponse> getAllCarToUser(Long id) {
+        //Проверка наличия пользователя
         User userFromDB = userService.getUserFromDB(id);
+        //Проверка статуса пользователя
+        userService.controlStatus(id);
 
-        return carRepository.findAllCarToUser(id).stream()
+        return carRepository.findAllCarToUser(id,CarStatus.DELETED).stream()
                 .map(car->mapper.convertValue(car,CarInfoResponse.class))
                 .collect(Collectors.toList());
 
 
 
     }
-
-
 
 }

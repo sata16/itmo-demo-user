@@ -21,4 +21,5 @@ public interface UserRepository extends JpaRepository<User, Long> {
     Page<User> findByUserStatusAndGenderNot(Pageable request, UserStatus status, @Param("filter") String filter);
 
     Optional<User> findByEmailIgnoreCase(String email);
+
 }
