@@ -87,13 +87,13 @@ public class CarService {
         }else{
             all = carRepository.findAllByStatusNotFiltered(pageRequest,CarStatus.DELETED,filter.toLowerCase());
         }
-        List<CarInfoResponse> content = all.getContent()
-                .stream()
+        List<CarInfoResponse> content = all.getContent().stream()
                 .map(car -> mapper.convertValue(car, CarInfoResponse.class))
                 .collect(Collectors.toList());
 
         return new PageImpl<>(content,pageRequest,all.getTotalElements());
     }
+
 
     public void addCarToUser(CarToUserRequest request) {
         Car car = carRepository.findById(request.getCarId())

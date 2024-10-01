@@ -7,6 +7,7 @@ import com.example.demo.model.dto.request.UserInfoRequest;
 import com.example.demo.model.dto.response.UserInfoResponse;
 import com.example.demo.model.enums.Gender;
 import com.example.demo.model.enums.UserStatus;
+import com.example.demo.utils.PaginationUtil;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -15,6 +16,8 @@ import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 
 import java.util.List;
@@ -84,6 +87,21 @@ public class UserServiceTest {
 
     @Test
     public void controlStatus() {
+        User user = new User();
+        user.setId(1L);
+        user.setStatus(UserStatus.CREATED);
+        when(userRepository.findById(user.getId())).thenReturn(Optional.of(user));
+        userService.controlStatus(user.getId());
+        assertEquals(UserStatus.CREATED, user.getStatus());
+    }
+
+    @Test(expected = CustomException.class)
+    public void controlStatus_badStatus() {
+        User user = new User();
+        user.setId(1L);
+        user.setStatus(UserStatus.DELETED);
+
+        userService.controlStatus(user.getId());
     }
 
     @Test
@@ -130,13 +148,15 @@ public class UserServiceTest {
         user2.setGender(Gender.FEMALE);
 
         List<User> users = List.of(user, user1, user2);
+        Pageable pageRequest = PaginationUtil.getPageRequests(1, 3, "age", Sort.Direction.ASC);
 
-        when(userRepository.findAll()).thenReturn(users);
+        PageImpl<User> page = new PageImpl<>(users, pageRequest,users.size());
+        when(userRepository.findByUserStatusAndGenderNot(pageRequest,UserStatus.DELETED,"FEMALE")).thenReturn(page);
+
         Page<UserInfoResponse> result = userService.getAllUsers(1,3,"age", Sort.Direction.ASC,"FEMALE");
-        assertEquals(result,users);
-
-
+        assertEquals(users.size(),result.getTotalElements());
 
     }
+
 
 }

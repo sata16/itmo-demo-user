@@ -10,6 +10,7 @@ import com.example.demo.model.dto.response.UserInfoResponse;
 import com.example.demo.model.enums.CarStatus;
 import com.example.demo.model.enums.Color;
 import com.example.demo.model.enums.UserStatus;
+import com.example.demo.utils.PaginationUtil;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -17,6 +18,10 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.MockitoJUnitRunner;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -91,6 +96,24 @@ public class CarServiceTest {
 
     @Test
     public void getAllCars() {
+        Pageable pageRequest = PaginationUtil.getPageRequests(1, 10, "brand", Sort.Direction.DESC);
+
+        List<Car> cars = new ArrayList<>();
+
+        cars.add(new Car());
+        cars.add(new Car());
+
+        PageImpl<Car> page = new PageImpl<>(cars, pageRequest, cars.size());
+
+        when(carRepository.findAllByStatusNotFiltered(pageRequest, CarStatus.DELETED, "bm".toLowerCase())).thenReturn(page);
+
+        Page<CarInfoResponse> allCars = carService.getAllCars(1, 10, "brand", Sort.Direction.DESC, "bm");
+
+        assertEquals(cars.size(), allCars.getTotalElements());
+
+        CarInfoResponse carInfoResponse = allCars.getContent().get(0);
+
+        assertNotNull(carInfoResponse);
     }
 
     @Test
@@ -125,7 +148,7 @@ public class CarServiceTest {
         user.setId(1L);
         user.setCars(cars);
         when(userService.getUserFromDB(user.getId())).thenReturn(user);
-        when(carRepository.findAll()).thenReturn(cars);
+        when(carRepository.findAllCarToUser(user.getId(),CarStatus.DELETED)).thenReturn(cars);
         List<CarInfoResponse> result = carService.getAllCarToUser(user.getId());
         assertEquals(cars.size(), result.size());
 
